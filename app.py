@@ -1,12 +1,7 @@
-# app.py
-# Waste Classification Streamlit Demo
-# TensorFlow SavedModel (export) vs OpenVINO inference comparison
-
 import streamlit as st
 import numpy as np
 import time
 from PIL import Image
-
 import tensorflow as tf
 from openvino.runtime import Core
 
@@ -28,12 +23,8 @@ IMG_SIZE = (224, 224)
 # ==================================================
 @st.cache_resource
 def load_tf_models():
-    """
-    Keras 3 export()로 생성된 TensorFlow SavedModel 로드
-    (서빙 전용, signatures 사용)
-    """
-    mn = tf.saved_model.load("mobilenetv2_infer_savedmodel")
-    ef = tf.saved_model.load("efficientnetb0_infer_savedmodel")
+    mn = tf.keras.models.load_model("mobilenetv2.h5", compile=False)
+    ef = tf.keras.models.load_model("efficientnetb0.h5", compile=False)
     return mn, ef
 
 
