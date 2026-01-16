@@ -1,18 +1,10 @@
-# ---- Core ----
 streamlit==1.53.0
-
-# ---- Data ----
 numpy==1.26.4
 pandas==2.3.3
 pillow==12.1.0
-
-# ---- Visualization ----
 altair==6.0.0
 pydeck==0.9.1
-
-# ---- ML (Inference only) ----
 tensorflow==2.15.0
-
-# ---- Utilities ----
 requests==2.32.5
 watchdog==6.0.0
+
