@@ -23,8 +23,8 @@ IMG_SIZE = (224, 224)
 # ==================================================
 @st.cache_resource
 def load_tf_models():
-    mn = tf.keras.models.load_model("mobilenet.h5", compile=False)
-    ef = tf.keras.models.load_model("efficientnet.h5", compile=False)
+    mn = tf.keras.models.load_model("mobilenet_infer.h5", compile=False)
+    ef = tf.keras.models.load_model("efficientnet_infer.h5", compile=False)
     return mn, ef
 
 
@@ -152,4 +152,5 @@ if uploaded_file:
 
 else:
     st.info("추론을 위해 이미지를 업로드 해주세요.")
+
 
