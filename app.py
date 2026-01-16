@@ -3,7 +3,6 @@ import numpy as np
 import time
 from PIL import Image
 import tensorflow as tf
-from openvino.runtime import Core
 
 
 # ==================================================
@@ -19,20 +18,28 @@ IMG_SIZE = (224, 224)
 
 
 # ==================================================
-# 모델 로딩 (캐시)
+# 모델 로딩 (TensorFlow / Keras)
 # ==================================================
 @st.cache_resource
 def load_tf_models():
-    mn = tf.keras.models.load_model("mobilenet_infer.keras", compile=False)
-    ef = tf.keras.models.load_model("efficientnet_infer.keras", compile=False)
+    mn = tf.keras.models.load_model(
+        "mobilenet_infer.keras",
+        compile=False
+    )
+    ef = tf.keras.models.load_model(
+        "efficientnet_infer.keras",
+        compile=False
+    )
     return mn, ef
 
 
+# ==================================================
+# OpenVINO 모델 로딩 (선택 시)
+# ==================================================
 @st.cache_resource
 def load_ov_models():
-    """
-    OpenVINO IR 모델 로드 및 CPU 컴파일
-    """
+    from openvino.runtime import Core  # ⚠️ 반드시 함수 안에서 import
+
     ie = Core()
 
     mn_model = ie.read_model("ov_mobilenet/saved_model.xml")
@@ -54,12 +61,9 @@ def preprocess_image(image: Image.Image):
 
 
 # ==================================================
-# TensorFlow SavedModel 추론 (signatures 방식)
+# TensorFlow (Keras) 추론
 # ==================================================
 def predict_tf(model, image: Image.Image, model_name: str):
-    """
-    TensorFlow SavedModel (export 기반) 추론 + latency 측정
-    """
     x = preprocess_image(image)
     x = x[None, ...]
 
@@ -68,13 +72,10 @@ def predict_tf(model, image: Image.Image, model_name: str):
     else:
         x = tf.keras.applications.efficientnet.preprocess_input(x)
 
-    infer = model.signatures["serving_default"]
-
     start = time.time()
-    outputs = infer(tf.constant(x))
+    preds = model(x, training=False).numpy()[0]
     latency = (time.time() - start) * 1000
 
-    preds = list(outputs.values())[0].numpy()[0]
     return preds, latency
 
 
@@ -99,7 +100,7 @@ def predict_ov(compiled_model, image: Image.Image):
 # UI
 # ==================================================
 st.title("♻️ 쓰레기 분류 데모")
-st.caption("TensorFlow Model vs OpenVINO 추론 비교")
+st.caption("TensorFlow vs OpenVINO 추론 비교")
 
 # ---------------- Sidebar ----------------
 st.sidebar.header("추론 모델 세팅")
@@ -152,6 +153,3 @@ if uploaded_file:
 
 else:
     st.info("추론을 위해 이미지를 업로드 해주세요.")
-
-
-
